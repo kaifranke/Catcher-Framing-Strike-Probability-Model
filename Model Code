@@ -1,0 +1,599 @@
+library(baseballr)
+library(randomForest)
+library(dplyr)
+library(stringr)
+library(caTools)
+library(Boruta)
+library(MLmetrics)
+library(pROC)
+library(rfUtilities)
+library(tune)
+library(ggplot2)
+library(caret)
+library(ggimage)
+library(pROC)
+library(writexl)
+library(ggpubr)
+
+set.seed(123)
+
+
+# Grabbing all of the data for pitchers in 2021 #
+
+data1 = scrape_statcast_savant(start_date = "2021-04-01",
+                               end_date = "2021-04-07",
+                               player_type = "pitcher")
+
+data2 = scrape_statcast_savant(start_date = "2021-04-08",
+                              end_date = "2021-04-14",
+                              player_type = "pitcher")
+
+data3 = scrape_statcast_savant(start_date = "2021-04-15",
+                              end_date = "2021-04-21",
+                              player_type = "pitcher")
+
+data4 = scrape_statcast_savant(start_date = "2021-04-22",
+                              end_date = "2021-04-28",
+                              player_type = "pitcher")
+
+data5 = scrape_statcast_savant(start_date = "2021-04-29",
+                              end_date = "2021-04-30",
+                              player_type = "pitcher")
+
+data6 = scrape_statcast_savant(start_date = "2021-05-01",
+                              end_date = "2021-05-07",
+                              player_type = "pitcher")
+
+data7 = scrape_statcast_savant(start_date = "2021-05-08",
+                              end_date = "2021-05-14",
+                              player_type = "pitcher")
+
+data8 = scrape_statcast_savant(start_date = "2021-05-15",
+                              end_date = "2021-05-21",
+                              player_type = "pitcher")
+
+data9 = scrape_statcast_savant(start_date = "2021-05-22",
+                              end_date = "2021-05-28",
+                              player_type = "pitcher")
+
+data10 = scrape_statcast_savant(start_date = "2021-05-29",
+                              end_date = "2021-05-31",
+                              player_type = "pitcher")
+
+data11 = scrape_statcast_savant(start_date = "2021-06-01",
+                              end_date = "2021-06-07",
+                              player_type = "pitcher")
+
+data12 = scrape_statcast_savant(start_date = "2021-06-08",
+                              end_date = "2021-06-14",
+                              player_type = "pitcher")
+
+data13 = scrape_statcast_savant(start_date = "2021-06-15",
+                              end_date = "2021-06-21",
+                              player_type = "pitcher")
+
+data14 = scrape_statcast_savant(start_date = "2021-06-22",
+                              end_date = "2021-06-28",
+                              player_type = "pitcher")
+
+data15 = scrape_statcast_savant(start_date = "2021-06-29",
+                              end_date = "2021-06-30",
+                              player_type = "pitcher")
+
+data16 = scrape_statcast_savant(start_date = "2021-07-01",
+                              end_date = "2021-07-07",
+                              player_type = "pitcher")
+
+data17 = scrape_statcast_savant(start_date = "2021-07-08",
+                              end_date = "2021-07-14",
+                              player_type = "pitcher")
+
+data18 = scrape_statcast_savant(start_date = "2021-07-15",
+                              end_date = "2021-07-21",
+                              player_type = "pitcher")
+
+data19 = scrape_statcast_savant(start_date = "2021-07-22",
+                              end_date = "2021-07-28",
+                              player_type = "pitcher")
+
+data20 = scrape_statcast_savant(start_date = "2021-07-29",
+                              end_date = "2021-07-31",
+                              player_type = "pitcher")
+
+data21 = scrape_statcast_savant(start_date = "2021-08-01",
+                              end_date = "2021-08-07",
+                              player_type = "pitcher")
+
+data22 = scrape_statcast_savant(start_date = "2021-08-08",
+                              end_date = "2021-08-14",
+                              player_type = "pitcher")
+
+data23 = scrape_statcast_savant(start_date = "2021-08-15",
+                              end_date = "2021-08-21",
+                              player_type = "pitcher")
+
+data24 = scrape_statcast_savant(start_date = "2021-08-22",
+                              end_date = "2021-08-28",
+                              player_type = "pitcher")
+
+data25 = scrape_statcast_savant(start_date = "2021-08-29",
+                              end_date = "2021-08-31",
+                              player_type = "pitcher")
+
+data26 = scrape_statcast_savant(start_date = "2021-09-01",
+                              end_date = "2021-09-07",
+                              player_type = "pitcher")
+
+data27 = scrape_statcast_savant(start_date = "2021-09-08",
+                              end_date = "2021-09-14",
+                              player_type = "pitcher")
+
+data28 = scrape_statcast_savant(start_date = "2021-09-15",
+                              end_date = "2021-09-21",
+                              player_type = "pitcher")
+
+data29 = scrape_statcast_savant(start_date = "2021-09-22",
+                              end_date = "2021-09-28",
+                              player_type = "pitcher")
+
+data30 = scrape_statcast_savant(start_date = "2021-09-29",
+                              end_date = "2021-09-30",
+                              player_type = "pitcher")
+
+data31 = scrape_statcast_savant(start_date = "2021-10-01",
+                              end_date = "2021-10-03",
+                              player_type = "pitcher")
+
+data2021 = rbind(data1, data2, data3, data4, data5, data6, data7, data8, data9, data10,
+                 data11, data12, data13, data14, data15, data16, data17, data18, data19,
+                 data20, data21, data22, data23, data24, data25, data26, data27, data28,
+                 data29, data30, data31)
+
+rm(data1, data2, data3, data4, data5, data6, data7, data8, data9, data10,
+   data11, data12, data13, data14, data15, data16, data17, data18, data19,
+   data20, data21, data22, data23, data24, data25, data26, data27, data28,
+   data29, data30, data31)
+
+# Saving and reloading the dataset when I need to #
+
+write.csv(data2021, file = "C:/Users/kaifr/Downloads/Baseball Research/all2021data.csv")
+data2021 = read.csv("C:/Users/kaifr/Downloads/Baseball Research/all2021data.csv")
+
+
+# Adding a strike variable that is either 1 or 0 #
+
+data2 = data2021 %>%
+  mutate(SoB = ifelse(type == "S", 1, 0))
+
+
+# Grabbing hitter data from 2021 to get their names for catchers #
+
+data1 = scrape_statcast_savant(start_date = "2021-04-01",
+                               end_date = "2021-04-07",
+                               player_type = "batter")
+
+data2 = scrape_statcast_savant(start_date = "2021-04-08",
+                               end_date = "2021-04-14",
+                               player_type = "batter")
+
+data3 = scrape_statcast_savant(start_date = "2021-04-15",
+                               end_date = "2021-04-21",
+                               player_type = "batter")
+
+data4 = scrape_statcast_savant(start_date = "2021-04-22",
+                               end_date = "2021-04-28",
+                               player_type = "batter")
+
+data5 = scrape_statcast_savant(start_date = "2021-04-29",
+                               end_date = "2021-04-30",
+                               player_type = "batter")
+
+data6 = scrape_statcast_savant(start_date = "2021-05-01",
+                               end_date = "2021-05-07",
+                               player_type = "batter")
+
+data7 = scrape_statcast_savant(start_date = "2021-05-08",
+                               end_date = "2021-05-14",
+                               player_type = "batter")
+
+data8 = scrape_statcast_savant(start_date = "2021-05-15",
+                               end_date = "2021-05-21",
+                               player_type = "batter")
+
+data9 = scrape_statcast_savant(start_date = "2021-05-22",
+                               end_date = "2021-05-28",
+                               player_type = "batter")
+
+data10 = scrape_statcast_savant(start_date = "2021-05-29",
+                                end_date = "2021-05-31",
+                                player_type = "batter")
+
+data11 = scrape_statcast_savant(start_date = "2021-06-01",
+                                end_date = "2021-06-07",
+                                player_type = "batter")
+
+data12 = scrape_statcast_savant(start_date = "2021-06-08",
+                                end_date = "2021-06-14",
+                                player_type = "batter")
+
+data13 = scrape_statcast_savant(start_date = "2021-06-15",
+                                end_date = "2021-06-21",
+                                player_type = "batter")
+
+data14 = scrape_statcast_savant(start_date = "2021-06-22",
+                                end_date = "2021-06-28",
+                                player_type = "batter")
+
+data15 = scrape_statcast_savant(start_date = "2021-06-29",
+                                end_date = "2021-06-30",
+                                player_type = "batter")
+
+data16 = scrape_statcast_savant(start_date = "2021-07-01",
+                                end_date = "2021-07-07",
+                                player_type = "batter")
+
+data17 = scrape_statcast_savant(start_date = "2021-07-08",
+                                end_date = "2021-07-14",
+                                player_type = "batter")
+
+data18 = scrape_statcast_savant(start_date = "2021-07-15",
+                                end_date = "2021-07-21",
+                                player_type = "batter")
+
+data19 = scrape_statcast_savant(start_date = "2021-07-22",
+                                end_date = "2021-07-28",
+                                player_type = "batter")
+
+data20 = scrape_statcast_savant(start_date = "2021-07-29",
+                                end_date = "2021-07-31",
+                                player_type = "batter")
+
+data21 = scrape_statcast_savant(start_date = "2021-08-01",
+                                end_date = "2021-08-07",
+                                player_type = "batter")
+
+data22 = scrape_statcast_savant(start_date = "2021-08-08",
+                                end_date = "2021-08-14",
+                                player_type = "batter")
+
+data23 = scrape_statcast_savant(start_date = "2021-08-15",
+                                end_date = "2021-08-21",
+                                player_type = "batter")
+
+data24 = scrape_statcast_savant(start_date = "2021-08-22",
+                                end_date = "2021-08-28",
+                                player_type = "batter")
+
+data25 = scrape_statcast_savant(start_date = "2021-08-29",
+                                end_date = "2021-08-31",
+                                player_type = "batter")
+
+data26 = scrape_statcast_savant(start_date = "2021-09-01",
+                                end_date = "2021-09-07",
+                                player_type = "batter")
+
+data27 = scrape_statcast_savant(start_date = "2021-09-08",
+                                end_date = "2021-09-14",
+                                player_type = "batter")
+
+data28 = scrape_statcast_savant(start_date = "2021-09-15",
+                                end_date = "2021-09-21",
+                                player_type = "batter")
+
+data29 = scrape_statcast_savant(start_date = "2021-09-22",
+                                end_date = "2021-09-28",
+                                player_type = "batter")
+
+data30 = scrape_statcast_savant(start_date = "2021-09-29",
+                                end_date = "2021-09-30",
+                                player_type = "batter")
+
+data31 = scrape_statcast_savant(start_date = "2021-10-01",
+                                end_date = "2021-10-03",
+                                player_type = "batter")
+
+
+bat = rbind(data1, data2, data3, data4, data5, data6, data7, data8, data9, data10,
+                 data11, data12, data13, data14, data15, data16, data17, data18, data19,
+                 data20, data21, data22, data23, data24, data25, data26, data27, data28,
+                 data29, data30, data31)
+
+rm(data1, data2, data3, data4, data5, data6, data7, data8, data9, data10,
+   data11, data12, data13, data14, data15, data16, data17, data18, data19,
+   data20, data21, data22, data23, data24, data25, data26, data27, data28,
+   data29, data30, data31)
+
+
+batters = bat %>%
+  select(player_name, batter) %>%
+  group_by(player_name) %>%
+  summarize(ID = mean(batter))
+
+
+# Saving and Reloading the batterID datasets #
+
+write.csv(batters, file = "C:/Users/kaifr/Downloads/Baseball Research/2021batterID.csv")
+batters = read.csv("C:/Users/kaifr/Downloads/Baseball Research/2021batterID.csv")
+
+
+
+# Data Cleaning and Manipulation #
+
+data4 = data2 %>% # This code joins together the two datasets
+  left_join(batters, by = c("fielder_2_1" = "ID")) 
+
+data5 = data4 %>%
+  mutate(xSoB = ifelse(plate_x >= -0.95 & plate_x <= 0.95 & plate_z >= sz_bot & plate_z <= sz_top, 1, 0)) %>%
+  filter(!is.na(SoB),
+         !is.na(xSoB), # <- this variable is what a robo umpire would call
+         description %in% c("ball", "called_strike")) # getting only called pitches by the ump
+
+
+# downloading umpire dataset incase I needed it
+umpires_ids_game_pk <- read.csv("C:/Users/kaifr/Downloads/Baseball Research/umpires_ids_game_pk.csv")
+
+
+umpires_ids_game_pk = umpires_ids_game_pk %>%
+  filter(position == "HP")
+
+data6 = data5 %>%
+  left_join(umpires_ids_game_pk, by = "game_pk") %>%
+  filter(!is.na(release_spin_rate)) %>%
+  filter(!is.na(pfx_x)) %>%
+  mutate(on_1b = ifelse(is.na(on_1b), 0, 1),
+         on_2b = ifelse(is.na(on_2b), 0, 1),
+         on_3b = ifelse(is.na(on_3b), 0, 1),
+         count = ifelse(strikes == 0 & balls == 0, "0-0", NA),
+         count = ifelse(strikes == 1 & balls == 0, "0-1", count),
+         count = ifelse(strikes == 2 & balls == 0, "0-2", count),
+         count = ifelse(strikes == 0 & balls == 1, "1-0", count),
+         count = ifelse(strikes == 0 & balls == 2, "2-0", count),
+         count = ifelse(strikes == 0 & balls == 3, "3-0", count),
+         count = ifelse(strikes == 1 & balls == 1, "1-1", count),
+         count = ifelse(strikes == 2 & balls == 1, "1-2", count),
+         count = ifelse(strikes == 2 & balls == 2, "2-2", count),
+         count = ifelse(strikes == 2 & balls == 3, "3-2", count),
+         count = ifelse(strikes == 1 & balls == 2, "2-1", count),
+         count = ifelse(strikes == 1 & balls == 3, "3-1", count))
+
+
+
+# Doing the Boruta for the model
+
+
+sample = data6[sample(nrow(data6), 5000), ] # sampled to 5000 as it helped with computing speed
+
+preBoruta = Boruta(as.factor(SoB) ~ release_speed + plate_x + plate_z + pfx_x + pfx_z + sz_bot + sz_top 
+                    + release_pos_x + release_pos_z + release_pos_y + release_spin_rate +
+                     count + outs_when_up + on_1b + on_2b + on_3b + outs_when_up +
+                     inning + inning_topbot + bat_score + fld_score + p_throws + stand, data = sample)
+
+feature_importance <- data.frame(attStats(preBoruta)) # creating a dataframe to see the importance
+print(preBoruta) 
+
+preboruta_data = feature_importance%>% # making a dataframe and reordering it to see importance
+  select(meanImp, decision)%>%
+  arrange(desc(meanImp))
+
+attributes = unlist(rownames(preboruta_data)) # using this to make the rownames a variable for ggplot
+preboruta_data2 = cbind(preboruta_data, attributes)
+
+
+ggplot(preboruta_data2, aes(reorder(attributes, meanImp), meanImp, color = decision)) +
+  geom_point(stat = "identity", size = 2.5) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 7)) +
+  scale_color_manual(values = c("Green", "Red")) +
+  labs(color = "Decision", title = "Boruta Importance Plot", caption = "Twitter: @kaifranke3") +
+  ylab("Importance") +
+  xlab("Variables")
+
+# Random Forest model building
+
+modelData = data6 %>%
+  select(player_name.y, name, player_name.x, SoB, xSoB, delta_run_exp, pitch_type, plate_x, plate_z, pfx_x, pfx_z, 
+         sz_bot, sz_top, game_date.x, release_speed, release_spin_rate, release_pos_x, release_pos_z, release_pos_y, batter, pitcher,
+         stand, p_throws, des, events, on_3b, on_2b, on_1b, outs_when_up, count, inning,
+         inning_topbot, spin_axis, bat_score)
+
+sapply(modelData, function(x) sum(is.na(x))) # checking to make sure data has no na's
+
+modelData$SoB = as.factor(modelData$SoB) # making Balls or strikes into a factor and not numeric
+
+
+smp_size <- floor(0.75 * nrow(modelData))
+train_ind <- sample(seq_len(nrow(modelData)), size = smp_size)
+
+
+train <- modelData[train_ind, ]
+test <- modelData[-train_ind, ]
+
+
+
+
+rf4 = randomForest(as.factor(SoB) ~ plate_z + plate_x + count + pfx_z + pfx_x + 
+                     release_pos_y + release_pos_x + release_speed + 
+                     stand + sz_bot + release_pos_z + 
+                     sz_top + p_throws, data = train, ntree = 200) # 200 because of run time
+
+preds = predict(rf4, newdata = test, type = "prob")
+
+final = cbind(test, preds)
+
+names(final) <- NULL # changed names to help with looking at the data
+
+name = c("Catcher", "Umpire", "Pitcher", "SoB", "xSoB", "Delta_Run_Exp", "Pitch_Type", "Plate_X",
+         "Plate_Z", "pfx_x", "pfx_z", "sz_bot", "sz_top", "game_date", "release_velo", "spin_rate",
+         "release_pos_x", "release_pos_z", "release_pos_y", "batter", "pitcher", "stand", "p_throws",
+         "des", "events", "on3b", "on2b", "on1b", "outs_when_up", "count", "inning",
+         "inning_topbot", "spin_axis", "bat_score", "lowProb", "Prob")
+
+names(final) = name
+
+
+final %>% # calibration plot
+  mutate(pred_rounded = round(Prob,1)) %>%
+  group_by(pred_rounded) %>%
+  summarize(mean_prediction = mean(Prob),
+            mean_actual = mean(as.numeric(SoB) - 1),
+            n = n()) %>%
+  ggplot(aes(x = pred_rounded, y = mean_actual)) +
+  geom_abline() +
+  geom_point(size = 5) +
+  xlab('Predicted Probability') +
+  ylab('Actual Probability') +
+  ggtitle('Calibration Plot') +
+  labs(caption = "Twitter @kaifranke3") +
+  ylim(0,1) +
+  xlim(0,1) +
+  theme_bw()
+
+rocC = roc(final$SoB, final$Prob)
+ggroc(rocC) + # roc plot
+  theme_bw() + 
+  ylab("Sensitivity") +
+  xlab("Specificity") +
+  labs(caption = "Twitter: @kaifranke3") +
+  ggtitle(paste0('ROC Curve ', '(AUC = ', 0.9813, ')')) + 
+  theme(aspect.ratio = 1)
+
+
+
+preds2 = predict(rf4, newdata = modelData, type = "prob") # getting predictions into full year's data, not just test set
+preds2 = as.data.frame(preds2)
+
+modelData2 = cbind(modelData, preds2)
+
+
+
+names(modelData2) <- NULL
+
+name = c("Catcher", "Umpire", "Pitcher", "SoB", "xSoB", "Delta_Run_Exp", "Pitch_Type", "Plate_X",
+         "Plate_Z", "pfx_x", "pfx_z", "sz_bot", "sz_top", "game_date", "release_velo", "spin_rate",
+         "release_pos_x", "release_pos_z", "release_pos_y", "batter", "pitcher", "stand", "p_throws",
+         "des", "events", "on3b", "on2b", "on1b", "outs_when_up", "count", "inning",
+         "inning_topbot", "spin_axis", "bat_score", "lowProb", "Prob")
+
+names(modelData2) = name
+
+final2 = modelData2 %>%
+  mutate(strProbadd = ifelse(SoB == 1, (1 - Prob), (Prob * -1))) # adding strikes added metric
+
+# Saving Dataframe and reload #
+
+write.csv(final2, file = "C:/Users/kaifr/Downloads/Baseball Research/finalCatchProb.csv")
+final2 = read.csv("C:/Users/kaifr/Downloads/Baseball Research/finalCatchProb.csv")
+
+
+# Analyzing Catchers #
+
+catchers = final2 %>% # aggregating each variable by the catcher
+  group_by(Catcher) %>%
+  summarize(n = n(),
+            strikeProbaddTot = sum(strProbadd),
+            avgProbadd = mean(strikeProbaddTot / n),
+            avgProbaddp1000 = avgProbadd * 1000) %>%
+  filter(n >= 1000) %>%
+  arrange(desc(avgProbaddp1000))
+
+catcherLead = catchers %>% # grabbing top 5 catchers 
+  arrange(desc(avgProbaddp1000)) %>%
+  head(5) 
+
+faces = c("C:/Users/kaifr/Downloads/Baseball Research/Blog Pics/nido.png",  # getting catcher pictures for ggplot
+          "C:/Users/kaifr/Downloads/Baseball Research/Blog Pics/gallagher.png",
+          "C:/Users/kaifr/Downloads/Baseball Research/Blog Pics/trevino.png",
+          "C:/Users/kaifr/Downloads/Baseball Research/Blog Pics/higas.png",
+          "C:/Users/kaifr/Downloads/Baseball Research/Blog Pics/heim.png")
+color = c("royal blue", "tan", "red", "navy blue", "red") # bar colors for ggplot
+
+catcherLead = cbind(catcherLead, faces, color)
+
+catcherLead$n = as.numeric(catcherLead$n)
+
+asp_ratio = 1.618 # making catcher faces more ratioed
+
+ggplot(catcherLead, aes(reorder(Catcher, -avgProbaddp1000),avgProbaddp1000)) +
+  geom_bar(stat = "identity", fill = color, color = "black") +
+  geom_image(image = faces, size = 0.2, by = "width", asp = asp_ratio) +
+  ylim(0,15) +
+  theme_bw() +
+  labs(title = "2021 Catcher Strike Probability Added Leaders", caption = "Twitter @kaifranke3",
+       subtitle = "Minimum 1000 Pitches Called") +
+  ylab("Strikes Added Per 1000") +
+  xlab("Catcher")
+
+mean(catchers$avgProbadd, na.rm = T)
+
+
+
+catcherLow = catchers %>% # getting worst 5 catchers
+  filter(!is.na(avgProbaddp1000)) %>%
+  arrange(desc(avgProbaddp1000)) %>%
+  tail(5) 
+
+faces2 = c("C:/Users/kaifr/Downloads/Baseball Research/Blog Pics/rivera.png", # more catcher faces
+          "C:/Users/kaifr/Downloads/Baseball Research/Blog Pics/wynns.png",
+          "C:/Users/kaifr/Downloads/Baseball Research/Blog Pics/collins.png",
+          "C:/Users/kaifr/Downloads/Baseball Research/Blog Pics/adams.png",
+          "C:/Users/kaifr/Downloads/Baseball Research/Blog Pics/cisco.png")
+color2 = c("royal blue", "dark orange", "sky blue", "red", "dark orange") # colors for ggplot
+
+catcherLow = cbind(catcherLow, faces2, color2)
+
+catcherLow$n = as.numeric(catcherLow$n)
+
+
+ggplot(catcherLow, aes(reorder(Catcher, -avgProbaddp1000),avgProbaddp1000)) +
+  geom_bar(stat = "identity", fill = color2, color = "black") +
+  geom_image(image = faces2, size = 0.2, by = "width", asp = asp_ratio) +
+  ylim(-20, 1) +
+  theme_bw() +
+  labs(title = "2021 Catcher Strike Probability Added Lowest", caption = "Twitter @kaifranke3",
+       subtitle = "Minimum 1000 Pitches Called") +
+  ylab("Strikes Added Per 1000") +
+  xlab("Catcher")
+
+
+write_xlsx(catchers,"C:/Users/kaifr/Downloads/Baseball Research/catcherLeaderboard.xlsx") # used for leaderboard
+
+
+# Metric Predictive Power #
+
+firstHalf = final2 %>% # filtering pre-all star break 
+  filter(game_date <= "2021-07-13") %>%
+  group_by(Catcher) %>%
+  summarize(n = n(),
+            strikeProbaddTot = sum(strProbadd),
+            avgProbadd = mean(strikeProbaddTot / n),
+            avgProbaddp10001st = avgProbadd * 1000) %>%
+  filter(n >= 500) %>%
+  select(Catcher, avgProbaddp10001st)
+
+secondHalf = final2 %>% # filter post-all star break
+  filter(game_date > "2021-07-13") %>%
+  group_by(Catcher) %>%
+  summarize(n = n(),
+            strikeProbaddTot = sum(strProbadd),
+            avgProbadd = mean(strikeProbaddTot / n),
+            avgProbaddp10002nd = avgProbadd * 1000) %>%
+  filter(n >= 500) %>%
+  select(Catcher, avgProbaddp10002nd)
+
+firsec = left_join(firstHalf, secondHalf, by = "Catcher") # combining the two sets
+
+firsec = firsec %>%
+  filter(!is.na(avgProbaddp10001st),
+         !is.na(avgProbaddp10002nd))
+
+ggplot(firsec, aes(avgProbaddp10001st, avgProbaddp10002nd)) +
+  geom_point() +
+  theme_bw() +
+  ylab("2nd Half Strikes Added / 1000") +
+  xlab("1st Half Strikes Added / 1000") +
+  labs(title = "1st Half Framing Performance vs 2nd Half", subtitle = "Minimum 500 Pitches Called in Each Half",
+       caption = "Twitter: @kaifranke3") +
+  stat_smooth(method = "lm") +
+  stat_regline_equation(aes(label = ..rr.label..)) # getting r-squared valye
+
+
